@@ -12,6 +12,7 @@ import {
 import styles from "./styles/index.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import { useEffect, useState } from "react";
 
 export function meta() {
   const error = useRouteError();
@@ -60,9 +61,58 @@ export function links() {
 }
 
 export default function App() {
+  const carritoLS =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("carrito")) ?? []
+      : null;
+  const [carrito, setCarrito] = useState(carritoLS);
+
+  useEffect(() => {
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+  }, [carrito]);
+
+  const agregarCarrito = (guitarra) => {
+    if (carrito.some((guitarraState) => guitarraState.id === guitarra.id)) {
+      const carritoActualizado = carrito.map((guitarraState) => {
+        if (guitarraState.id === guitarra.id) {
+          guitarraState.cantidad = guitarra.cantidad;
+        }
+        return guitarraState;
+      });
+
+      setCarrito(carritoActualizado);
+    } else {
+      setCarrito([...carrito, guitarra]);
+    }
+  };
+
+  const actualizarCantidad = (guitarra) => {
+    const carritoActualizado = carrito.map((guitarraState) => {
+      if (guitarraState.id === guitarra.id) {
+        guitarraState.cantidad = guitarra.cantidad;
+      }
+      return guitarraState;
+    });
+    setCarrito(carritoActualizado);
+  };
+
+  const eliminarGuitarra = (id) => {
+    const carritoActualizado = carrito.filter(
+      (guitarraState) => guitarraState.id !== id
+    );
+    setCarrito(carritoActualizado);
+  };
+
   return (
     <Document>
-      <Outlet />
+      <Outlet
+        context={ {
+          carrito,
+          agregarCarrito,
+          actualizarCantidad,
+          eliminarGuitarra,
+        } }
+      />
     </Document>
   );
 }
@@ -76,7 +126,7 @@ function Document({ children }) {
       </head>
       <body>
         <Header />
-        {children}
+        { children }
         <Footer />
         <ScrollRestoration />
         <Scripts />
@@ -93,7 +143,7 @@ export function ErrorBoundary() {
     return (
       <Document>
         <p className="error">
-          {error.status} {error.statusText}
+          { error.status } { error.statusText }
         </p>
         <Link className="error-enlace">Volver al inicio</Link>
       </Document>

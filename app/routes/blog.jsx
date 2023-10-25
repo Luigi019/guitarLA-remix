@@ -1,7 +1,7 @@
 import { useLoaderData } from "@remix-run/react";
 import { obtenerPosts } from "../models/posts.server";
 import styles from "../styles/blog.css";
-import Post from "../components/post";
+import ListadoPosts from "../components/listado-posts";
 
 export async function loader({ params }) {
   const { postUrl } = params;
@@ -22,9 +22,7 @@ export function meta({ data }) {
     return [{ title: "GuitarLA - Error" }];
   }
 
-  const nombre = data.data[0].attributes.nombre;
-
-  return [{ title: `GuitarLA - ${nombre}` }];
+  return [{ title: `GuitarLA - Nuestro Blog` }];
 }
 
 export function links() {
@@ -37,17 +35,14 @@ export function links() {
 }
 
 const Blog = () => {
-  const posts = useLoaderData();
+  const posts = useLoaderData()
 
   return (
     <main className="contenedor">
-      <h2 className="heading">Blog</h2>
 
-      <div className="blog">
-        {posts.data?.map((post) => (
-          <Post key={post.id} post={post} />
-        ))}
-      </div>
+      <ListadoPosts
+        posts={ posts.data }
+      />
     </main>
   );
 };
